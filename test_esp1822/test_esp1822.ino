@@ -1,8 +1,12 @@
 #include <NewPing.h> //biblioteka czujnika ultradzwiekowego
+#include <ELClient.h>
+#include <ELClientWebServer.h>
 
 #define TRIGGER_PIN  A1
 #define ECHO_PIN     A2
 #define MAX_DISTANCE 400
+#define LED_PIN A3
+
 
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 
@@ -12,13 +16,55 @@ unsigned long sonarPreviousMillis = 0;
 const long pumpInterval = 2000;    //900000 to 15 min. 
 const long sonarInterval = 4000;
 
+ELClient esp(&Serial);
+ELClientWebServer webServer(&esp);
+void ledPageLoadAndRefreshCb(char * url)
+{
+  if( digitalRead(LED_PIN) )
+    webServer.setArgString(F("text"), F("LED is on"));
+  else
+    webServer.setArgString(F("text"), F("LED is off"));
+}
+
+void ledButtonPressCb(char * btnId)
+{
+  String id = btnId;
+  if( id == F("btn_on") )
+    digitalWrite(LED_PIN, true);
+  else if( id == F("btn_off") )
+    digitalWrite(LED_PIN, false);
+}
+void resetCb(void) {
+  Serial.println("EL-Client (re-)starting!");
+  bool ok = false;
+  do {
+    ok = esp.Sync();      // sync up with esp-link, blocks for up to 2 seconds
+    if (!ok) Serial.println("EL-Client sync failed!");
+  } while(!ok);
+  Serial.println("EL-Client synced!");
+  
+  webServer.setup();
+}
+
+
+
+
+
 void setup() {
-Serial.begin(9600);
+Serial.begin(115200);
 pinMode(A0, OUTPUT);
 pinMode(A0, OUTPUT);
 digitalWrite(A0, LOW);
 Serial.println("koniec sekwencji startowej");
 
+URLHandler *ledHandler = webServer.createURLHandler(F("/SimpleLED.html.json"));
+ledHandler->loadCb.attach(&ledPageLoadAndRefreshCb);
+ledHandler->refreshCb.attach(&ledPageLoadAndRefreshCb);
+ledHandler->buttonCb.attach(&ledButtonPressCb);
+
+esp.resetCb = resetCb;
+resetCb();
+esp.Process();
 }
 
 void loop() {
