@@ -1,0 +1,70 @@
+<!doctype html><html><head><title>esp-link</title><link rel=stylesheet href="/pure.css"><link rel=stylesheet href="/style.css"><meta name=viewport content="width=device-width, initial-scale=1">
+
+<script>
+    function sendData(){
+        //get the input value
+//        $someInput = $('#someInput').val();
+        $.ajax({
+            //the url to send the data to
+            url: "http://192.168.1.60/SimpleLED.html.json?reason=button&id=btn_on",
+            //the data to send to
+            data: {someInput : 'SimpleLED.html.json?reason=button&id=btn_on'},
+            //type. for eg: GET, POST
+            type: "POST",
+            //datatype expected to get in reply form server
+            dataType: "json",
+            //on success
+            success: function(data){
+                //do something after something is recieved from php
+            },
+            //on error
+            error: function(){
+                //bad request
+            }
+        });
+    }
+
+</script>
+
+
+<script>
+    function sendDataOff(){
+        //get the input value
+//        $someInput = $('#someInput').val();
+        $.ajax({
+            //the url to send the data to
+            url: "http://192.168.1.60/SimpleLED.html.json?reason=button&id=btn_off",
+            //the data to send to
+            data: {someInput : 'SimpleLED.html.json?reason=button&id=btn_off'},
+            //type. for eg: GET, POST
+            type: "POST",
+            //datatype expected to get in reply form server
+            dataType: "json",
+            //on success
+            success: function(data){
+                //do something after something is recieved from php
+            },
+            //on error
+            error: function(){
+                //bad request
+            }
+        });
+    }
+
+</script>
+
+
+</head><body><div id=layout>   <!-- EspLink will add header here -->
+  
+  <h1 class="header">Sterowanie</h1>
+
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+ <input type="button" value="Wlacz" onclick=sendData()> <br><br>
+ <input type="button" value="Wylaczlacz" onclick=sendDataOff()>
+
+
+  </body></html>
+
