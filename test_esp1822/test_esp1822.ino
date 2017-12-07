@@ -51,7 +51,7 @@ void resetCb(void) {
 
 
 void setup() {
-Serial.begin(115200);
+Serial.begin(9600);
 pinMode(A0, OUTPUT);
 pinMode(A0, OUTPUT);
 digitalWrite(A0, LOW);
