@@ -1,4 +1,4 @@
-#include <NewPing.h>
+#include <NewPing.h> //biblioteka czujnika ultradzwiekowego
 
 #define TRIGGER_PIN  A1
 #define ECHO_PIN     A2
