@@ -5,7 +5,7 @@
 #define TRIGGER_PIN  A1
 #define ECHO_PIN     A2
 #define MAX_DISTANCE 400
-#define LED_PIN A3
+//#define LED_PIN A3
 
 
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
@@ -20,7 +20,7 @@ ELClient esp(&Serial);
 ELClientWebServer webServer(&esp);
 void ledPageLoadAndRefreshCb(char * url)
 {
-  if( digitalRead(LED_PIN) )
+  if( digitalRead(A3) )
     webServer.setArgString(F("text"), F("LED is on"));
   else
     webServer.setArgString(F("text"), F("LED is off"));
@@ -30,9 +30,9 @@ void ledButtonPressCb(char * btnId)
 {
   String id = btnId;
   if( id == F("btn_on") )
-    digitalWrite(LED_PIN, true);
+    digitalWrite(A3, true);
   else if( id == F("btn_off") )
-    digitalWrite(LED_PIN, false);
+    digitalWrite(A3, false);
 }
 void resetCb(void) {
   Serial.println("EL-Client (re-)starting!");
