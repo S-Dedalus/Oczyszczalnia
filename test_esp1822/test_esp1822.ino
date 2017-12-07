@@ -64,10 +64,12 @@ ledHandler->buttonCb.attach(&ledButtonPressCb);
 
 esp.resetCb = resetCb;
 resetCb();
-esp.Process();
+
 }
 
 void loop() {
+
+esp.Process();
 
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= pumpInterval) {
