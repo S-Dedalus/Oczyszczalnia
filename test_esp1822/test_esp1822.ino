@@ -30,9 +30,9 @@ void ledButtonPressCb(char * btnId)
 {
   String id = btnId;
   if( id == F("btn_on") )
-    digitalWrite(A3, true);
+    digitalWrite(A3, HIGH);
   else if( id == F("btn_off") )
-    digitalWrite(A3, false);
+    digitalWrite(A3, LOW);
 }
 void resetCb(void) {
   Serial.println("EL-Client (re-)starting!");
@@ -54,6 +54,7 @@ void setup() {
 Serial.begin(9600);
 pinMode(A0, OUTPUT);
 pinMode(A0, OUTPUT);
+pinMode(A3, OUTPUT);
 digitalWrite(A0, LOW);
 Serial.println("koniec sekwencji startowej");
 
