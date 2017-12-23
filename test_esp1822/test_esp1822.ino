@@ -90,11 +90,11 @@ esp.Process();
   int distance = 0;
   if (sonarCurrentMillis - sonarPreviousMillis >= sonarInterval) {
     sonarPreviousMillis = sonarCurrentMillis;
-    Serial.print("Ping: ");
+/*    Serial.print("Ping: ");
     pingMs = sonar.ping_median(8);
     distance = sonar.convert_cm(pingMs);
     Serial.print(distance);
-    Serial.println(" cm");
+    Serial.println(" cm");*/
     Serial.println(sonar.ping_cm());
   }
 
