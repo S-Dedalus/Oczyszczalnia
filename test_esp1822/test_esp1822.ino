@@ -16,6 +16,8 @@ unsigned long sonarPreviousMillis = 0;
 const long pumpInterval = 2000;    //900000 to 15 min. 
 const long sonarInterval = 4000;
 
+
+
 ELClient esp(&Serial);
 ELClientWebServer webServer(&esp);
 void ledPageLoadAndRefreshCb(char * url)
@@ -56,6 +58,8 @@ pinMode(A0, OUTPUT);
 pinMode(A0, OUTPUT);
 pinMode(A3, OUTPUT);
 digitalWrite(A0, LOW);
+pinMode(A0, OUTPUT);
+digitalWrite(A0, HIGH);
 Serial.println("koniec sekwencji startowej");
 
 URLHandler *ledHandler = webServer.createURLHandler(F("/SimpleLED.html.json"));
