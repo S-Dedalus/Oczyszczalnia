@@ -58,8 +58,6 @@ pinMode(A0, OUTPUT);
 pinMode(A0, OUTPUT);
 pinMode(A3, OUTPUT);
 digitalWrite(A0, LOW);
-pinMode(A0, OUTPUT);
-digitalWrite(A0, HIGH);
 Serial.println("koniec sekwencji startowej");
 
 URLHandler *ledHandler = webServer.createURLHandler(F("/SimpleLED.html.json"));
@@ -96,7 +94,8 @@ esp.Process();
     Serial.print("Ping: ");
     pingMs = sonar.ping_median(8);
     distance = sonar.convert_cm(pingMs);
-    Serial.println("cm");
+    Serial.print(distance);
+    Serial.println(" cm");
   }
 
 }
