@@ -16,8 +16,6 @@ unsigned long sonarPreviousMillis = 0;
 const long pumpInterval = 2000;    //900000 to 15 min. 
 const long sonarInterval = 4000;
 
-
-
 ELClient esp(&Serial);
 ELClientWebServer webServer(&esp);
 void ledPageLoadAndRefreshCb(char * url)
@@ -54,9 +52,10 @@ void resetCb(void) {
 
 void setup() {
 Serial.begin(9600);
-pinMode(A0, OUTPUT);
-pinMode(A0, OUTPUT);
-pinMode(A3, OUTPUT);
+pinMode(A0, OUTPUT);// Pompka napowietrzania, cykliczne załączanie
+pinMode(A1, OUTPUT); //trigger pin 
+pinMode(A2, INPUT); //Echo pin 
+pinMode(A3, OUTPUT); // wyjście sterowane guzikiem z html (pompka wydzutu wody)
 digitalWrite(A0, LOW);
 Serial.println("koniec sekwencji startowej");
 
