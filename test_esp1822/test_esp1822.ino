@@ -95,6 +95,7 @@ esp.Process();
     distance = sonar.convert_cm(pingMs);
     Serial.print(distance);
     Serial.println(" cm");
+    Serial.println(sonar.ping_cm());
   }
 
 }
