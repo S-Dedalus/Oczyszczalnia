@@ -1,6 +1,8 @@
-#include <NewPing.h> //biblioteka czujnika ultradzwiekowego
+ #include <NewPing.h> //biblioteka czujnika ultradzwiekowego
 #include <ELClient.h>
 #include <ELClientWebServer.h>
+#include <ELClientRest.h>
+#include <Ultrasonic.h>
 
 #define TRIGGER_PIN  A1
 #define ECHO_PIN     A2
@@ -8,16 +10,21 @@
 //#define LED_PIN A3
 
 
-NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
+//NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
+Ultrasonic ultrasonic(TRIGGER_PIN, ECHO_PIN);
 
 unsigned long time;
 unsigned long previousMillis = 0;
 unsigned long sonarPreviousMillis = 0;
 const long pumpInterval = 2000;    //900000 to 15 min. 
-const long sonarInterval = 4000;
+const long sonarInterval = 1000;
+int poziom_max = 40;
+int poziom_min = 250;
 
-ELClient esp(&Serial);
+ELClient esp(&Serial, &Serial);
 ELClientWebServer webServer(&esp);
+ELClientRest rest(&esp);
+
 void ledPageLoadAndRefreshCb(char * url)
 {
   if( digitalRead(A3) )
@@ -46,10 +53,6 @@ void resetCb(void) {
   webServer.setup();
 }
 
-
-
-
-
 void setup() {
 Serial.begin(9600);
 pinMode(A0, OUTPUT);// Pompka napowietrzania, cykliczne załączanie
@@ -59,6 +62,13 @@ pinMode(A3, OUTPUT); // wyjście sterowane guzikiem z html (pompka wydzutu wody)
 digitalWrite(A0, LOW);
 Serial.println("koniec sekwencji startowej");
 
+  bool ok;
+  do {
+    ok = esp.Sync();      // synchronizuje esp-link, blokuje system na 2 sek.
+    if (!ok) Serial.println("EL-Client sync failed!");
+  } while(!ok);
+  Serial.println("EL-Client synced!");
+
 URLHandler *ledHandler = webServer.createURLHandler(F("/SimpleLED.html.json"));
 ledHandler->loadCb.attach(&ledPageLoadAndRefreshCb);
 ledHandler->refreshCb.attach(&ledPageLoadAndRefreshCb);
@@ -67,7 +77,17 @@ ledHandler->buttonCb.attach(&ledButtonPressCb);
 esp.resetCb = resetCb;
 resetCb();
 
+
+  int err = rest.begin("192.168.1.54", 8080);
+  if (err != 0) {
+    Serial.print("REST begin failed: ");
+ //   Serial.println(err);
+    while(1) ;
+  }
+  Serial.println("EL-REST ready");
 }
+
+#define BUFLEN 266
 
 void loop() {
 
@@ -95,7 +115,13 @@ esp.Process();
     distance = sonar.convert_cm(pingMs);
     Serial.print(distance);
     Serial.println(" cm");*/
-    Serial.println(sonar.ping_cm());
+    //Serial.println(sonar.ping_cm());
+    int dystans = ultrasonic.distanceRead();
+    Serial.println(dystans);
+    int procent;
+    procent = ((dystans - poziom_min)*100)/(poziom_max - poziom_min);
+    Serial.print(procent);
+    Serial.println("%");
   }
 
 }
