@@ -1,4 +1,3 @@
- #include <NewPing.h> //biblioteka czujnika ultradzwiekowego
 #include <ELClient.h>
 #include <ELClientWebServer.h>
 #include <ELClientRest.h>
@@ -7,39 +6,37 @@
 #define TRIGGER_PIN  A1
 #define ECHO_PIN     A2
 #define MAX_DISTANCE 400
-//#define LED_PIN A3
 
-
-//NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 Ultrasonic ultrasonic(TRIGGER_PIN, ECHO_PIN);
 
 unsigned long time;
 unsigned long previousMillis = 0;
 unsigned long sonarPreviousMillis = 0;
-const long pumpInterval = 2000;    //900000 to 15 min. 
+unsigned long wyrzutPerviosMillis = 0;
+const long pumpInterval = 900000;    //900000 to 15 min. 
 const long sonarInterval = 1000;
 int poziom_max = 40;
 int poziom_min = 250;
 
-ELClient esp(&Serial, &Serial);
+ELClient esp(&Serial);
 ELClientWebServer webServer(&esp);
 ELClientRest rest(&esp);
 
-void ledPageLoadAndRefreshCb(char * url)
+/*void ledPageLoadAndRefreshCb(char * url)
 {
   if( digitalRead(A3) )
     webServer.setArgString(F("text"), F("LED is on"));
   else
     webServer.setArgString(F("text"), F("LED is off"));
-}
+}*/
 
 void ledButtonPressCb(char * btnId)
 {
   String id = btnId;
   if( id == F("btn_on") )
-    digitalWrite(A3, HIGH);
-  else if( id == F("btn_off") )
     digitalWrite(A3, LOW);
+  else if( id == F("btn_off") )
+    digitalWrite(A3, HIGH);
 }
 void resetCb(void) {
   Serial.println("EL-Client (re-)starting!");
@@ -53,13 +50,25 @@ void resetCb(void) {
   webServer.setup();
 }
 
+
+int sprawdzPoziom() {
+    int dystans = ultrasonic.distanceRead();
+    Serial.println(dystans);
+    int procent;
+    procent = ((dystans - poziom_min)*100)/(poziom_max - poziom_min);
+    Serial.print(procent);
+    Serial.println("%");
+    return(procent);
+}
+
 void setup() {
 Serial.begin(9600);
 pinMode(A0, OUTPUT);// Pompka napowietrzania, cykliczne załączanie
 pinMode(A1, OUTPUT); //trigger pin 
 pinMode(A2, INPUT); //Echo pin 
 pinMode(A3, OUTPUT); // wyjście sterowane guzikiem z html (pompka wydzutu wody)
-digitalWrite(A0, LOW);
+digitalWrite(A0, HIGH);
+digitalWrite(A3, HIGH);
 Serial.println("koniec sekwencji startowej");
 
   bool ok;
@@ -70,8 +79,8 @@ Serial.println("koniec sekwencji startowej");
   Serial.println("EL-Client synced!");
 
 URLHandler *ledHandler = webServer.createURLHandler(F("/SimpleLED.html.json"));
-ledHandler->loadCb.attach(&ledPageLoadAndRefreshCb);
-ledHandler->refreshCb.attach(&ledPageLoadAndRefreshCb);
+//ledHandler->loadCb.attach(&ledPageLoadAndRefreshCb);
+//ledHandler->refreshCb.attach(&ledPageLoadAndRefreshCb);
 ledHandler->buttonCb.attach(&ledButtonPressCb);
 
 esp.resetCb = resetCb;
@@ -96,32 +105,29 @@ esp.Process();
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= pumpInterval) {
     previousMillis = currentMillis;
-    if (digitalRead(A0) == LOW) {
-      digitalWrite(A0, HIGH);
+    if (digitalRead(A0) == HIGH) {
+      digitalWrite(A0, LOW);
       Serial.println("wlaczam pompke");
           }
-          else {
-            digitalWrite(A0, LOW);
-            Serial.println("wylaczam pompke");
+     else {
+         digitalWrite(A0, HIGH);
+         Serial.println("wylaczam pompke");
           }
   }
   unsigned long sonarCurrentMillis = millis();
-  int pingMs = 0;
-  int distance = 0;
   if (sonarCurrentMillis - sonarPreviousMillis >= sonarInterval) {
     sonarPreviousMillis = sonarCurrentMillis;
-/*    Serial.print("Ping: ");
-    pingMs = sonar.ping_median(8);
-    distance = sonar.convert_cm(pingMs);
-    Serial.print(distance);
-    Serial.println(" cm");*/
-    //Serial.println(sonar.ping_cm());
-    int dystans = ultrasonic.distanceRead();
-    Serial.println(dystans);
-    int procent;
-    procent = ((dystans - poziom_min)*100)/(poziom_max - poziom_min);
-    Serial.print(procent);
-    Serial.println("%");
+    if (sprawdzPoziom() >= 85) {
+      digitalWrite(A3, LOW);
+      }
+  unsigned long wyrzutCurrentMillis = millis();
+      if (wyrzutPerviosMillis - wyrzutCurrentMillis >= 500){
+        wyrzutPerviosMillis = wyrzutCurrentMillis;
+        if (sprawdzPoziom() <= 15){
+          digitalWrite(A3, HIGH);
+        }
+      }
+  
   }
 
 }
