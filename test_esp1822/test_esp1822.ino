@@ -21,7 +21,7 @@ const long sonarInterval = 2000;
 int poziom_max = 40;
 int poziom_min = 250;
 
-ELClient esp(&Serial);
+ELClient esp(&Serial, &Serial);
 ELClientWebServer webServer(&esp);
 ELClientRest rest(&esp);
 
@@ -146,7 +146,7 @@ Serial.println("koniec sekwencji startowej");
   Serial.println("EL-Client synced!");
 
 
-URLHandler *handler = webServer.createURLHandler("/Sterowanie.html.json");
+URLHandler *handler = webServer.createURLHandler(F("/Sterowanie.html.json"));
 handler->loadCb.attach(&loadCb);
 handler->refreshCb.attach(&refreshCb);
 handler->buttonCb.attach(&buttonCb);
