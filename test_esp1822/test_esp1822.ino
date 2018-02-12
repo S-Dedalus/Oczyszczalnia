@@ -16,7 +16,7 @@ unsigned long previousMillis = 0;
 unsigned long sonarPreviousMillis = 0;
 unsigned long wyrzutPerviosMillis = 0;
 const long pumpInterval = 900000;    //900000 to 15 min. 
-const long sonarInterval = 1000;
+const long sonarInterval = 2000;
 int poziom_max = 40;
 int poziom_min = 250;
 
@@ -92,7 +92,7 @@ void refreshCb(char * url)
 
 int sprawdzPoziom() {
     int dystans = ultrasonic.distanceRead();
-    Serial.println(dystans);
+//  Serial.println(dystans);
     int procent;
     procent = ((dystans - poziom_min)*100)/(poziom_max - poziom_min);
     Serial.print(procent);
@@ -150,6 +150,7 @@ void loop() {
 
 esp.Process();
 
+//obsługa pompki powietrza
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= pumpInterval) {
     previousMillis = currentMillis;
@@ -162,17 +163,19 @@ esp.Process();
          Serial.println("wylaczam pompke");
           }
   }
+
+  
   unsigned long sonarCurrentMillis = millis();
   if (sonarCurrentMillis - sonarPreviousMillis >= sonarInterval) {
     sonarPreviousMillis = sonarCurrentMillis;
     if (sprawdzPoziom() >= 85) {
-      digitalWrite(WATER_PUMP, LOW);
+//      digitalWrite(WATER_PUMP, LOW);
       }
   unsigned long wyrzutCurrentMillis = millis();
       if (wyrzutPerviosMillis - wyrzutCurrentMillis >= 500){
         wyrzutPerviosMillis = wyrzutCurrentMillis;
         if (sprawdzPoziom() <= 15){
-          digitalWrite(WATER_PUMP, HIGH);
+//          digitalWrite(WATER_PUMP, HIGH);
         }
       }
   
