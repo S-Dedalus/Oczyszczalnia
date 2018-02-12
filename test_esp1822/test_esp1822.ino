@@ -59,7 +59,7 @@ void buttonCb(char * button_id)
      {
       digitalWrite(WATER_PUMP, LOW);
       Serial.println("ON");
-      rest.get("/json.htm?type=command&param=switchlight&idx=27&switchcmd=On");
+/*      rest.get("/json.htm?type=command&param=switchlight&idx=27&switchcmd=On");
       char response[BUFLEN];
       memset(response, 0, BUFLEN);
       uint16_t code = rest.waitResponse(response, BUFLEN);
@@ -70,13 +70,13 @@ void buttonCb(char * button_id)
       else {
          Serial.print("Nie wykonano zapytania GET: ");
          Serial.println(code);
-    }
+    }*/
      }
      if( id == F("id_off") )
      {
       digitalWrite(WATER_PUMP, HIGH);
       Serial.println("OFF");
-      rest.get("/json.htm?type=command&param=switchlight&idx=27&switchcmd=Off");
+/*      rest.get("/json.htm?type=command&param=switchlight&idx=27&switchcmd=Off");
       char response[BUFLEN];
       memset(response, 0, BUFLEN);
       uint16_t code = rest.waitResponse(response, BUFLEN);
@@ -87,7 +87,7 @@ void buttonCb(char * button_id)
       else {
          Serial.print("Nie wykonano zapytania GET: ");
          Serial.println(code);
-    }
+    }*/
      }
    }
 
@@ -128,7 +128,7 @@ int sprawdzPoziom() {
 }
 
 void setup() {
-Serial.begin(9600);
+Serial.begin(115200);
 pinMode(A0, OUTPUT);// Pompka napowietrzania, cykliczne załączanie
 pinMode(TRIGGER_PIN, OUTPUT); //trigger pin 
 pinMode(ECHO_PIN, INPUT); //Echo pin 
