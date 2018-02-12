@@ -165,9 +165,18 @@ esp.Process();
   if (sonarCurrentMillis - sonarPreviousMillis >= sonarInterval) {
     sonarPreviousMillis = sonarCurrentMillis;
     int procent = sprawdzPoziom();
-    String url = ("/json.htm?type=command&param=udevice&idx=33&nvalue=0&svalue=" + procent);
-    const char* s_url = url.c_str();
-    Serial.println(s_url);
-    rest.get(s_url);
-  }
+    String url = ("/json.htm?type=command&param=udevice&idx=33&nvalue=0&svalue=");
+    String s_proc = String(procent);
+    //const char* s_url = url.c_str();
+    String dane = url + s_proc;
+//    char *dane;
+/*    sprintf(dane, "%s", url);
+    sprintf(dane, "%s", procent);*/
+    
+    Serial.println(dane);
+    char dane_char[63];
+    strcpy(dane_char, dane.c_str());
+    Serial.println(dane_char);
+    rest.get(dane_char, "");
+      }
 }
