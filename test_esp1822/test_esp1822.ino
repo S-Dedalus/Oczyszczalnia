@@ -6,6 +6,8 @@
 #define TRIGGER_PIN  A1
 #define ECHO_PIN     A2
 #define MAX_DISTANCE 400
+#define WATER_PUMP  A3
+#define PUMP_CHECK  A4
 
 Ultrasonic ultrasonic(TRIGGER_PIN, ECHO_PIN);
 
@@ -24,20 +26,20 @@ ELClientRest rest(&esp);
 
 /*void ledPageLoadAndRefreshCb(char * url)
 {
-  if( digitalRead(A3) )
+  if( digitalRead(WATER_PUMP) )
     webServer.setArgString(F("text"), F("LED is on"));
   else
     webServer.setArgString(F("text"), F("LED is off"));
-}*/
+}
 
 void ledButtonPressCb(char * btnId)
 {
   String id = btnId;
   if( id == F("btn_on") )
-    digitalWrite(A3, LOW);
+    digitalWrite(WATER_PUMP, LOW);
   else if( id == F("btn_off") )
-    digitalWrite(A3, HIGH);
-}
+    digitalWrite(WATER_PUMP, HIGH);
+}*/
 void resetCb(void) {
   Serial.println("EL-Client (re-)starting!");
   bool ok = false;
@@ -46,9 +48,46 @@ void resetCb(void) {
     if (!ok) Serial.println("EL-Client sync failed!");
   } while(!ok);
   Serial.println("EL-Client synced!");
-  
   webServer.setup();
 }
+
+void buttonCb(char * button_id)
+   {
+     String id = button_id;
+     if( id == F("id_on") )
+     {
+      digitalWrite(WATER_PUMP, LOW);
+     }
+     if( id == F("id_off") )
+     {
+      digitalWrite(WATER_PUMP, HIGH);
+     }
+   }
+
+void loadCb(char * url)
+   {
+     bool stan;
+     stan = digitalRead(PUMP_CHECK);
+     if (stan == LOW){
+      webServer.setArgString(F("text"), F("Pompa jest włączona"));
+     }
+     if (stan == HIGH){
+      webServer.setArgString(F("text"), F("Pompa jest wyłączona"));
+     }
+     }
+
+
+void refreshCb(char * url)
+   {
+     bool stan;
+     stan = digitalRead(PUMP_CHECK);
+     if (stan == LOW){
+      webServer.setArgString(F("text"), F("Pompa jest włączona"));
+     }
+     if (stan == HIGH){
+      webServer.setArgString(F("text"), F("Pompa jest wyłączona"));
+     }
+     }
 
 
 int sprawdzPoziom() {
@@ -64,11 +103,12 @@ int sprawdzPoziom() {
 void setup() {
 Serial.begin(9600);
 pinMode(A0, OUTPUT);// Pompka napowietrzania, cykliczne załączanie
-pinMode(A1, OUTPUT); //trigger pin 
-pinMode(A2, INPUT); //Echo pin 
-pinMode(A3, OUTPUT); // wyjście sterowane guzikiem z html (pompka wydzutu wody)
+pinMode(TRIGGER_PIN, OUTPUT); //trigger pin 
+pinMode(ECHO_PIN, INPUT); //Echo pin 
+pinMode(WATER_PUMP, OUTPUT); // wyjście sterowane guzikiem z html (pompka wydzutu wody),
+pinMode(PUMP_CHECK, INPUT);
 digitalWrite(A0, HIGH);
-digitalWrite(A3, HIGH);
+digitalWrite(WATER_PUMP, HIGH);
 Serial.println("koniec sekwencji startowej");
 
   bool ok;
@@ -78,10 +118,18 @@ Serial.println("koniec sekwencji startowej");
   } while(!ok);
   Serial.println("EL-Client synced!");
 
-URLHandler *ledHandler = webServer.createURLHandler(F("/SimpleLED.html.json"));
-//ledHandler->loadCb.attach(&ledPageLoadAndRefreshCb);
-//ledHandler->refreshCb.attach(&ledPageLoadAndRefreshCb);
+
+URLHandler *handler = webServer.createURLHandler("/Sterowanie.html.json");
+handler->loadCb.attach(&loadCb);
+handler->refreshCb.attach(&refreshCb);
+handler->buttonCb.attach(&buttonCb);
+
+/*
+URLHandler *ledHandler = webServer.createURLHandler(F("/Sterowanie.html.json"));
+ledHandler->loadCb.attach(&ledPageLoadAndRefreshCb);
+ledHandler->refreshCb.attach(&ledPageLoadAndRefreshCb);
 ledHandler->buttonCb.attach(&ledButtonPressCb);
+*/
 
 esp.resetCb = resetCb;
 resetCb();
@@ -118,13 +166,13 @@ esp.Process();
   if (sonarCurrentMillis - sonarPreviousMillis >= sonarInterval) {
     sonarPreviousMillis = sonarCurrentMillis;
     if (sprawdzPoziom() >= 85) {
-      digitalWrite(A3, LOW);
+      digitalWrite(WATER_PUMP, LOW);
       }
   unsigned long wyrzutCurrentMillis = millis();
       if (wyrzutPerviosMillis - wyrzutCurrentMillis >= 500){
         wyrzutPerviosMillis = wyrzutCurrentMillis;
         if (sprawdzPoziom() <= 15){
-          digitalWrite(A3, HIGH);
+          digitalWrite(WATER_PUMP, HIGH);
         }
       }
   
