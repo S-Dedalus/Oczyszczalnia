@@ -8,6 +8,7 @@
 #define MAX_DISTANCE 400
 #define WATER_PUMP  A3
 #define PUMP_CHECK  A4
+#define BUFLEN 266
 
 Ultrasonic ultrasonic(TRIGGER_PIN, ECHO_PIN);
 
@@ -58,11 +59,35 @@ void buttonCb(char * button_id)
      {
       digitalWrite(WATER_PUMP, LOW);
       Serial.println("ON");
+      rest.get("/json.htm?type=command&param=switchlight&idx=27&switchcmd=On");
+      char response[BUFLEN];
+      memset(response, 0, BUFLEN);
+      uint16_t code = rest.waitResponse(response, BUFLEN);
+      if(code == HTTP_STATUS_OK){
+         Serial.println("Ustawiono przelacznik domoticza na on");
+         Serial.println(response);
+                } 
+      else {
+         Serial.print("Nie wykonano zapytania GET: ");
+         Serial.println(code);
+    }
      }
      if( id == F("id_off") )
      {
       digitalWrite(WATER_PUMP, HIGH);
       Serial.println("OFF");
+      rest.get("/json.htm?type=command&param=switchlight&idx=27&switchcmd=Off");
+      char response[BUFLEN];
+      memset(response, 0, BUFLEN);
+      uint16_t code = rest.waitResponse(response, BUFLEN);
+      if(code == HTTP_STATUS_OK){
+         Serial.println("Ustawiono przelacznik domoticza na on");
+         Serial.println(response);
+                } 
+      else {
+         Serial.print("Nie wykonano zapytania GET: ");
+         Serial.println(code);
+    }
      }
    }
 
@@ -145,8 +170,6 @@ resetCb();
   }
   Serial.println("EL-REST ready");
 }
-
-#define BUFLEN 266
 
 void loop() {
 
