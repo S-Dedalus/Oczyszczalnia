@@ -9,6 +9,7 @@
 #define WATER_PUMP  A3
 #define PUMP_CHECK  A4
 #define BUFLEN 266
+#define DEBUG_DIS
 
 Ultrasonic ultrasonic(TRIGGER_PIN, ECHO_PIN);
 
@@ -59,35 +60,12 @@ void buttonCb(char * button_id)
      {
       digitalWrite(WATER_PUMP, LOW);
       Serial.println("ON");
-      rest.get("/json.htm?type=command&param=switchlight&idx=27&switchcmd=On");
-/*      char response[BUFLEN];
-      memset(response, 0, BUFLEN);
-      uint16_t code = rest.waitResponse(response, BUFLEN);
-      if(code == HTTP_STATUS_OK){
-         Serial.println("Ustawiono przelacznik domoticza na on");
-         Serial.println(response);
-                } 
-      else {
-         Serial.print("Nie wykonano zapytania GET: ");
-         Serial.println(code);
-    }*/
      }
      if( id == F("id_off") )
      {
       digitalWrite(WATER_PUMP, HIGH);
       Serial.println("OFF");
-      rest.get("/json.htm?type=command&param=switchlight&idx=27&switchcmd=Off");
-/*      char response[BUFLEN];
-      memset(response, 0, BUFLEN);
-      uint16_t code = rest.waitResponse(response, BUFLEN);
-      if(code == HTTP_STATUS_OK){
-         Serial.println("Ustawiono przelacznik domoticza na on");
-         Serial.println(response);
-                } 
-      else {
-         Serial.print("Nie wykonano zapytania GET: ");
-         Serial.println(code);
-    }*/
+
      }
    }
 
@@ -151,13 +129,6 @@ handler->loadCb.attach(&loadCb);
 handler->refreshCb.attach(&refreshCb);
 handler->buttonCb.attach(&buttonCb);
 
-/*
-URLHandler *ledHandler = webServer.createURLHandler(F("/Sterowanie.html.json"));
-ledHandler->loadCb.attach(&ledPageLoadAndRefreshCb);
-ledHandler->refreshCb.attach(&ledPageLoadAndRefreshCb);
-ledHandler->buttonCb.attach(&ledButtonPressCb);
-*/
-
 esp.resetCb = resetCb;
 resetCb();
 
@@ -193,17 +164,7 @@ esp.Process();
   unsigned long sonarCurrentMillis = millis();
   if (sonarCurrentMillis - sonarPreviousMillis >= sonarInterval) {
     sonarPreviousMillis = sonarCurrentMillis;
-    if (sprawdzPoziom() >= 85) {
-//      digitalWrite(WATER_PUMP, LOW);
-      }
-/*  unsigned long wyrzutCurrentMillis = millis();
-      if (wyrzutPerviosMillis - wyrzutCurrentMillis >= 500){
-        wyrzutPerviosMillis = wyrzutCurrentMillis;
-        if (sprawdzPoziom() <= 15){
-//          digitalWrite(WATER_PUMP, HIGH);
-        }
-      }
-*/  
+    int procent = sprawdzPoziom();
+    rest.get("/json.htm?type=command&param=udevice&idx=33&nvalue=0&svalue=" + procent);
   }
-
 }
