@@ -57,10 +57,12 @@ void buttonCb(char * button_id)
      if( id == F("id_on") )
      {
       digitalWrite(WATER_PUMP, LOW);
+      Serial.println("ON");
      }
      if( id == F("id_off") )
      {
       digitalWrite(WATER_PUMP, HIGH);
+      Serial.println("OFF");
      }
    }
 
