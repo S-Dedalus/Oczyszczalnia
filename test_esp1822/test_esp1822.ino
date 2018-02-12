@@ -18,7 +18,7 @@ unsigned long previousMillis = 0;
 unsigned long sonarPreviousMillis = 0;
 unsigned long wyrzutPerviosMillis = 0;
 const long pumpInterval = 900000;    //900000 to 15 min. 
-const long sonarInterval = 2000;
+const long sonarInterval = 20000;
 int poziom_max = 40;
 int poziom_min = 250;
 
@@ -165,6 +165,8 @@ esp.Process();
   if (sonarCurrentMillis - sonarPreviousMillis >= sonarInterval) {
     sonarPreviousMillis = sonarCurrentMillis;
     int procent = sprawdzPoziom();
-    rest.get("/json.htm?type=command&param=udevice&idx=33&nvalue=0&svalue=" + procent);
+    const char* url = ("/json.htm?type=command&param=udevice&idx=33&nvalue=0&svalue=" + procent);
+    Serial.println(url);
+    rest.get(url);
   }
 }
