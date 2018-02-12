@@ -59,8 +59,8 @@ void buttonCb(char * button_id)
      {
       digitalWrite(WATER_PUMP, LOW);
       Serial.println("ON");
-/*      rest.get("/json.htm?type=command&param=switchlight&idx=27&switchcmd=On");
-      char response[BUFLEN];
+      rest.get("/json.htm?type=command&param=switchlight&idx=27&switchcmd=On");
+/*      char response[BUFLEN];
       memset(response, 0, BUFLEN);
       uint16_t code = rest.waitResponse(response, BUFLEN);
       if(code == HTTP_STATUS_OK){
@@ -76,8 +76,8 @@ void buttonCb(char * button_id)
      {
       digitalWrite(WATER_PUMP, HIGH);
       Serial.println("OFF");
-/*      rest.get("/json.htm?type=command&param=switchlight&idx=27&switchcmd=Off");
-      char response[BUFLEN];
+      rest.get("/json.htm?type=command&param=switchlight&idx=27&switchcmd=Off");
+/*      char response[BUFLEN];
       memset(response, 0, BUFLEN);
       uint16_t code = rest.waitResponse(response, BUFLEN);
       if(code == HTTP_STATUS_OK){
