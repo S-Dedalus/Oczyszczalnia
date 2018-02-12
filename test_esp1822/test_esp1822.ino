@@ -165,7 +165,7 @@ esp.Process();
   if (sonarCurrentMillis - sonarPreviousMillis >= sonarInterval) {
     sonarPreviousMillis = sonarCurrentMillis;
     int procent = sprawdzPoziom();
-    const char* url = ("/json.htm?type=command&param=udevice&idx=33&nvalue=0&svalue=" + procent);
+    char url = ("/json.htm?type=command&param=udevice&idx=33&nvalue=0&svalue=" + procent);
     Serial.println(url);
     rest.get(url);
   }
