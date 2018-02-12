@@ -167,15 +167,11 @@ esp.Process();
     int procent = sprawdzPoziom();
     String url = ("/json.htm?type=command&param=udevice&idx=33&nvalue=0&svalue=");
     String s_proc = String(procent);
-    //const char* s_url = url.c_str();
     String dane = url + s_proc;
-//    char *dane;
-/*    sprintf(dane, "%s", url);
-    sprintf(dane, "%s", procent);*/
-    
     Serial.println(dane);
     char dane_char[63];
-    strcpy(dane_char, dane.c_str());
+    strncpy(dane_char, dane.c_str(), sizeof(dane_char));
+    dane_char[sizeof(dane_char) - 1] = 0;
     Serial.println(dane_char);
     rest.get(dane_char, "");
       }
