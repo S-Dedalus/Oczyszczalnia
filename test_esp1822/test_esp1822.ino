@@ -171,14 +171,14 @@ esp.Process();
     if (sprawdzPoziom() >= 85) {
 //      digitalWrite(WATER_PUMP, LOW);
       }
-  unsigned long wyrzutCurrentMillis = millis();
+/*  unsigned long wyrzutCurrentMillis = millis();
       if (wyrzutPerviosMillis - wyrzutCurrentMillis >= 500){
         wyrzutPerviosMillis = wyrzutCurrentMillis;
         if (sprawdzPoziom() <= 15){
 //          digitalWrite(WATER_PUMP, HIGH);
         }
       }
-  
+*/  
   }
 
 }
