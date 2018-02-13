@@ -107,7 +107,7 @@ int sprawdzPoziom() {
 
 int poziomSredni(){
   for (int i = 0; i<10; i++){
-      int tablica[10];
+      static int tablica[10];
       int poziom_sr = sprawdzPoziom();
       tablica[i] = poziom_sr;
       delay(1000);
