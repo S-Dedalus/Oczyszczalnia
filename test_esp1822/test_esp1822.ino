@@ -106,13 +106,13 @@ int sprawdzPoziom() {
 }
 
 int poziomSredni(){
+  static int tablica[10];
   for (int i = 0; i<10; i++){
-      static int tablica[10];
       int poziom_sr = sprawdzPoziom();
       tablica[i] = poziom_sr;
       delay(1000);
+      }
       return tablica;
-    }
 }
 
 void setup() {
