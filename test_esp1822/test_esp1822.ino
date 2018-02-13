@@ -110,7 +110,7 @@ int poziomSredni(){
       int tablica[10];
       int poziom_sr = sprawdzPoziom();
       tablica[i] = poziom_sr;
-      delay(500);
+      delay(1000);
       return tablica;
     }
 }
@@ -186,7 +186,7 @@ esp.Process();
     rest.get(dane_char, "");
     int* srednio = poziomSredni();
     for (int i=0; i<10; i++){
-      Serial.print(srednio[i], "|");
+      Serial.println(srednio[i]);
     }
 
     
