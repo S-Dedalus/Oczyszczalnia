@@ -184,8 +184,10 @@ esp.Process();
     dane_char[sizeof(dane_char) - 1] = 0;
     Serial.println(dane_char);
     rest.get(dane_char, "");
-    int srednio = poziomSredni();
-    Serial.print(srednio);
+    int* srednio = poziomSredni();
+    for (int i=0; i<10; i++){
+      Serial.print(srednio[i]);
+    }
 
     
       }
