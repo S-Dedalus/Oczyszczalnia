@@ -100,8 +100,8 @@ int sprawdzPoziom() {
 //  Serial.println(dystans);
     int procent;
     procent = ((dystans - poziom_min)*100)/(poziom_max - poziom_min);
-    Serial.print(procent);
-    Serial.println("%");
+//    Serial.print(procent);
+//    Serial.println("%");
     return(procent);
 }
 
