@@ -105,6 +105,16 @@ int sprawdzPoziom() {
     return(procent);
 }
 
+int poziomSredni(){
+  for (int i = 0; i<10; i++){
+      int tablica[10];
+      int poziom_sr = sprawdzPoziom();
+      tablica[i] = poziom_sr;
+      delay(500);
+      return tablica;
+    }
+}
+
 void setup() {
 Serial.begin(115200);
 pinMode(A0, OUTPUT);// Pompka napowietrzania, cykliczne załączanie
@@ -174,5 +184,9 @@ esp.Process();
     dane_char[sizeof(dane_char) - 1] = 0;
     Serial.println(dane_char);
     rest.get(dane_char, "");
+    int srednio = poziomSredni();
+    Serial.print(srednio);
+
+    
       }
 }
