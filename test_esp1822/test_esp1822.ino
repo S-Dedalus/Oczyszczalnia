@@ -2,6 +2,7 @@
 #include <ELClientWebServer.h>
 #include <ELClientRest.h>
 #include <Ultrasonic.h>
+#include <SoftwareSerial.h>
 
 #define TRIGGER_PIN  A1
 #define ECHO_PIN     A2
@@ -11,7 +12,8 @@
 #define BUFLEN 266
 #define DEBUG_DIS
 
-Ultrasonic ultrasonic(TRIGGER_PIN, ECHO_PIN);
+//Ultrasonic ultrasonic(TRIGGER_PIN, ECHO_PIN);
+SoftwareSerial mySerial(ECHO_PIN, TRIGGER_PIN); //inicjalizuje SoftwareSerial dla 3 trybu pracy czujnika
 
 unsigned long time;
 unsigned long previousMillis = 0;
@@ -19,8 +21,8 @@ unsigned long sonarPreviousMillis = 0;
 unsigned long wyrzutPerviosMillis = 0;
 const long pumpInterval = 900000;    //900000 to 15 min. 
 const long sonarInterval = 20000;
-int poziom_max = 40;
-int poziom_min = 250;
+int poziom_max = 400; //w milimetrach
+int poziom_min = 2500; //w milimetrach
 
 ELClient esp(&Serial, &Serial);
 ELClientWebServer webServer(&esp);
@@ -42,6 +44,17 @@ void ledButtonPressCb(char * btnId)
   else if( id == F("btn_off") )
     digitalWrite(WATER_PUMP, HIGH);
 }*/
+
+
+void holdTime(word msec) {
+  unsigned long czasA = millis();
+  unsigned long czasB = millis();
+  do {
+       czasA = millis();
+  } while (czasA - czasB >= msec);
+ }
+
+
 void resetCb(void) {
   Serial.println("EL-Client (re-)starting!");
   bool ok = false;
@@ -95,7 +108,7 @@ void refreshCb(char * url)
      }
 
 
-int sprawdzPoziom() {
+/*int sprawdzPoziom() {
     int dystans = ultrasonic.distanceRead();
 //  Serial.println(dystans);
     int procent;
@@ -103,20 +116,44 @@ int sprawdzPoziom() {
 //    Serial.print(procent);
 //    Serial.println("%");
     return(procent);
-}
+}*/
 
-int poziomSredni(){
+int poziomSredni(){                     //dokończyc!!!
   static int tablica[10];
   for (int i = 0; i<10; i++){
-      int poziom_sr = sprawdzPoziom();
+      int poziom_sr = getData();
       tablica[i] = poziom_sr;
       delay(1000);
       }
-      return tablica;
+      return tablica; 
 }
+    
+byte getData(){ //obsługa działania na bitach z czujnika
+   byte ramka[3]; 
+   ramka[0] = 3;
+   while (ramka[0] != 0 and ((ramka[0] + ramka[1] + ramka[2])>>8) != ramka[3]){
+    mySerial.print(0x55);
+    for (byte i=0; i=3; i++){
+      ramka[i]= mySerial.read(); 
+     }
+   }
+   holdTime(300);
+   for (byte i=0; i=3; i++){
+      Serial.println(ramka[i]); 
+   }
+   int dystans = ramka[1];
+   dystans << 8;
+   dystans =+ ramka[2];
+   int procent;
+   procent = ((dystans - poziom_min)*100)/(poziom_max - poziom_min);
+   
+return dystans;
+}
+ 
 
 void setup() {
 Serial.begin(115200);
+mySerial.begin(9600);
 pinMode(A0, OUTPUT);// Pompka napowietrzania, cykliczne załączanie
 pinMode(TRIGGER_PIN, OUTPUT); //trigger pin 
 pinMode(ECHO_PIN, INPUT); //Echo pin 
@@ -174,7 +211,7 @@ esp.Process();
   unsigned long sonarCurrentMillis = millis();
   if (sonarCurrentMillis - sonarPreviousMillis >= sonarInterval) {
     sonarPreviousMillis = sonarCurrentMillis;
-    int procent = sprawdzPoziom();
+    int procent = getData();
     String url = ("/json.htm?type=command&param=udevice&idx=33&nvalue=0&svalue=");
     String s_proc = String(procent);
     String dane = url + s_proc;
@@ -185,7 +222,7 @@ esp.Process();
     Serial.println(dane_char);
     rest.get(dane_char, "");
     delay(800);
-    int* srednio = poziomSredni();
+    int srednio = poziomSredni();
     for (int i=0; i<10; i++){
       Serial.println(srednio[i]);
     }
