@@ -1,0 +1,88 @@
+
+#include <elapsedMillis.h>
+
+elapsedMillis interwalOdczytow;
+elapsedMillis pomiaryCzas;
+
+int pomiary[10];
+
+
+int pomiar() {
+  int distance;
+  if (Serial.available()) {
+    Serial.write(0x55);
+    byte recived[4];
+    for (int i = 0; i < 4; i++) {
+      int a = Serial.read();
+      recived[i] = a;
+    }
+    Serial1.println("odebrano dane z czytnika");
+    if (recived[0] = 0xFF) {
+      Serial1.println("pierwszy bajt z czytnika poprawny");
+      int crc = 0xFF + recived[1] + recived[2];
+      if (recived[3] = crc) {
+        Serial1.println("poprawna suma kontrolna");
+        int hBit = recived[1];
+        int lBit = recived[2];
+        hBit << 8;
+        distance = hBit | lBit;
+        Serial1.print("Zmierzona odleglosc = ");
+        Serial1.print(distance);
+        Serial1.println(" mm");
+      }
+      else {
+        Serial1.println("blad sumy kontrolnej");
+      }
+    }
+    else {
+      Serial1.println("błąd pierwszego bajta");
+    }
+  }
+  return distance;
+}
+
+void sort(int a[], int size) {
+  for (int i = 0; i < (size - 1); i++) {
+    for (int o = 0; o < (size - (i + 1)); o++) {
+      if (a[o] > a[o + 1]) {
+        int t = a[o];
+        a[o] = a[o + 1];
+        a[o + 1] = t;
+      }
+    }
+  }
+}
+
+
+
+void setup() {
+  Serial.begin(9600);
+  Serial1.begin(115200);
+}
+
+
+void loop() {
+  if (interwalOdczytow >= 60000) {
+    for (int i = 0; i < 10; i++) {
+      pomiary[i] = pomiar();
+      pomiaryCzas = 0;
+      delay(600);
+    }
+    interwalOdczytow = 0;
+    sort(pomiary, 10);
+    Serial1.print(pomiary[0]);
+    Serial1.print(pomiary[1]);
+    Serial1.print(pomiary[2]);
+    Serial1.print(pomiary[3]);
+    Serial1.print(pomiary[4]);
+    Serial1.print(pomiary[5]);
+    Serial1.print(pomiary[6]);
+    Serial1.print(pomiary[7]);
+    Serial1.print(pomiary[8]);
+    Serial1.println(pomiary[9]);
+    int avgPomiary = (pomiary[3] + pomiary[4] + pomiary[5] + pomiary[6]);
+    avgPomiary = avgPomiary / 4;
+    Serial1.print("Ostateczny usredniony wynik pomiarow: ");
+    Serial1.print(avgPomiary);
+  }
+}
