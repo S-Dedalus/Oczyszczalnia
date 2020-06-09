@@ -78,16 +78,9 @@ void loop() {
     i++;
     if (i >= 10) {
       sort(pomiary, 10);
-      Serial.println(pomiary[0]);
-      Serial.println(pomiary[1]);
-      Serial.println(pomiary[2]);
-      Serial.println(pomiary[3]);
-      Serial.println(pomiary[4]);
-      Serial.println(pomiary[5]);
-      Serial.println(pomiary[6]);
-      Serial.println(pomiary[7]);
-      Serial.println(pomiary[8]);
-      Serial.println(pomiary[9]);
+      for (int b = 0; b < 10; b++) {
+        Serial.println(pomiary[b]);
+      }
       int avgPomiary = (pomiary[3] + pomiary[4] + pomiary[5] + pomiary[6]);
       avgPomiary = avgPomiary / 4;
       Serial.print("Ostateczny usredniony wynik pomiarow: ");
