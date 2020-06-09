@@ -1,41 +1,42 @@
 
-#include <elapsedMillis.h>
+#include <SoftwareSerial.h>
 
-elapsedMillis interwalOdczytow;
-elapsedMillis pomiaryCzas;
+SoftwareSerial mySerial(4, 5); // RX, TX = D2, D1
 
 int pomiary[10];
 
 
-int pomiar() {
-  int distance;
-  if (Serial.available()) {
-    Serial.write(0x55);
+uint16_t pomiar() {
+  uint16_t distance = 0;
+
+  mySerial.write(0x55);
+  if (mySerial.available()) {
+
     byte recived[4];
     for (int i = 0; i < 4; i++) {
-      int a = Serial.read();
+      int a = mySerial.read();
       recived[i] = a;
     }
-    Serial1.println("odebrano dane z czytnika");
+    Serial.println("odebrano dane z czytnika");
     if (recived[0] = 0xFF) {
-      Serial1.println("pierwszy bajt z czytnika poprawny");
-      int crc = 0xFF + recived[1] + recived[2];
+      Serial.println("pierwszy bajt z czytnika poprawny");
+      uint32_t crc = 0xFF + recived[1] + recived[2];
       if (recived[3] = crc) {
-        Serial1.println("poprawna suma kontrolna");
-        int hBit = recived[1];
-        int lBit = recived[2];
-        hBit << 8;
+        Serial.println("poprawna suma kontrolna");
+        uint16_t hBit = recived[1];
+        uint8_t lBit = recived[2];
+        hBit <<= 8;
         distance = hBit | lBit;
-        Serial1.print("Zmierzona odleglosc = ");
-        Serial1.print(distance);
-        Serial1.println(" mm");
+        Serial.print("Zmierzona odleglosc = ");
+        Serial.print(distance);
+        Serial.println(" mm");
       }
       else {
-        Serial1.println("blad sumy kontrolnej");
+        Serial.println("blad sumy kontrolnej");
       }
     }
     else {
-      Serial1.println("błąd pierwszego bajta");
+      Serial.println("błąd pierwszego bajta");
     }
   }
   return distance;
@@ -56,33 +57,42 @@ void sort(int a[], int size) {
 
 
 void setup() {
-  Serial.begin(9600);
-  Serial1.begin(115200);
+  Serial.begin(115200);
+  mySerial.begin(9600);
+  Serial.println(" ");
+  Serial.println(" ");
+  Serial.println(" ");
+  Serial.println("Zainicjowano Serial");
 }
 
 
 void loop() {
-  if (interwalOdczytow >= 60000) {
-    for (int i = 0; i < 10; i++) {
-      pomiary[i] = pomiar();
-      pomiaryCzas = 0;
-      delay(600);
+  unsigned long t = 5000;
+  static unsigned long _ETimer;
+  if ( millis() - _ETimer >= (t)) {
+    _ETimer += (t);
+
+    static unsigned int i;
+    pomiary[i] = pomiar();
+
+    i++;
+    if (i >= 10) {
+      sort(pomiary, 10);
+      Serial.println(pomiary[0]);
+      Serial.println(pomiary[1]);
+      Serial.println(pomiary[2]);
+      Serial.println(pomiary[3]);
+      Serial.println(pomiary[4]);
+      Serial.println(pomiary[5]);
+      Serial.println(pomiary[6]);
+      Serial.println(pomiary[7]);
+      Serial.println(pomiary[8]);
+      Serial.println(pomiary[9]);
+      int avgPomiary = (pomiary[3] + pomiary[4] + pomiary[5] + pomiary[6]);
+      avgPomiary = avgPomiary / 4;
+      Serial.print("Ostateczny usredniony wynik pomiarow: ");
+      Serial.println(avgPomiary);
+      i=0;
     }
-    interwalOdczytow = 0;
-    sort(pomiary, 10);
-    Serial1.print(pomiary[0]);
-    Serial1.print(pomiary[1]);
-    Serial1.print(pomiary[2]);
-    Serial1.print(pomiary[3]);
-    Serial1.print(pomiary[4]);
-    Serial1.print(pomiary[5]);
-    Serial1.print(pomiary[6]);
-    Serial1.print(pomiary[7]);
-    Serial1.print(pomiary[8]);
-    Serial1.println(pomiary[9]);
-    int avgPomiary = (pomiary[3] + pomiary[4] + pomiary[5] + pomiary[6]);
-    avgPomiary = avgPomiary / 4;
-    Serial1.print("Ostateczny usredniony wynik pomiarow: ");
-    Serial1.print(avgPomiary);
   }
 }
