@@ -1,7 +1,18 @@
-
+/*
+ * Skrypt wylicza odległość czujnika od powierzchni wody w zbiorniku. Przed użyciem nalezy podac dane:  
+ * nazwa sieci i haslo (linia 86)
+ * odleglosc do dna pustego zbiornika (linia 115)
+ * odleglosc od powierzchni przy pełnym zbiorniku (linia 116)
+ * Warto takze sprawdzic link do Domoticza. */
 #include <SoftwareSerial.h>
+#include <Arduino.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiClient.h>
 
 SoftwareSerial mySerial(4, 5); // RX, TX = D2, D1
+ESP8266WiFiMulti WiFiMulti;
 
 int pomiary[10];
 
@@ -59,10 +70,20 @@ void sort(int a[], int size) {
 void setup() {
   Serial.begin(115200);
   mySerial.begin(9600);
-for (int c=1; c<4; c++) {
-  Serial.println(" ");
-}
+  for (int c = 1; c < 4; c++) {
+    Serial.println(" ");
+  }
   Serial.println("Zainicjowano Serial");
+
+
+  for (uint8_t t = 4; t > 0; t--) {
+    Serial.printf("[SETUP] WAIT %d...\n", t);
+    Serial.flush();
+    delay(1000);
+  }
+
+  WiFi.mode(WIFI_STA);
+  WiFiMulti.addAP("**************", "**************");
 }
 
 
@@ -85,7 +106,51 @@ void loop() {
       avgPomiary = avgPomiary / 4;
       Serial.print("Ostateczny usredniony wynik pomiarow: ");
       Serial.println(avgPomiary);
-      i=0;
+      i = 0;
+      if ((WiFiMulti.run() == WL_CONNECTED)) {
+        WiFiClient client;
+        HTTPClient http;
+        String domoticzIP = "http://192.168.1.55:8080/json.htm?type=command&param=udevice&idx=38&nvalue=0&svalue=";
+        Serial.print("[HTTP] begin...\n");
+        uint16_t empty = 2300; //odleglosc do dna pustego zbiornika
+        uint16_t full = 300; //odleglosc od powierzchni przy pełnym zbiorniku
+        int16_t licznik = (avgPomiary - empty);
+        Serial.println(licznik);
+        int16_t mianownik = (full - empty);
+        Serial.println(mianownik);
+        float perc = ((float)licznik/(float)mianownik);
+        Serial.println(perc);
+        perc = perc*100;
+        Serial.println(perc);
+        String link = domoticzIP += perc;
+        Serial.println(link);
+
+        if (http.begin(client, link)) { //PROCENTOWO!!!!
+
+          Serial.print("[HTTP] GET...\n");
+          // start connection and send HTTP header
+          int httpCode = http.GET();
+
+          // httpCode will be negative on error
+          if (httpCode > 0) {
+            // HTTP header has been send and Server response header has been handled
+            Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+
+            // file found at server
+            if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+              String payload = http.getString();
+              Serial.println(payload);
+            }
+          } else {
+            Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+          }
+
+
+          http.end();
+        }
+      }
+
+
     }
   }
 }
