@@ -17,29 +17,26 @@
 
 const int relay = 14; //wyjscie przekznika GPIO14 (D5).
 
+
+
 SoftwareSerial mySerial(4, 5); // RX, TX = D2, D1
 ESP8266WiFiMulti WiFiMulti;
 ESP8266WebServer server(80);
 
 void handleRoot() {
+  String color = "#ffffff";
   if (server.hasArg("key1")) {
     Serial.println("Pompa ON");
     digitalWrite(relay, HIGH);
+    color = "#ff0000";
   }
 
   else if (server.hasArg("key2")) {
     Serial.println("Pompa OFF");
     digitalWrite(relay, LOW);
-  }
-
-  boolean stan = digitalRead(14);
-  String color = "#33FF00";
-  if (stan) {
-    color = "#ff0000";
-  }
-  else {
     color = "#33FF00";
   }
+
   String content = "<!DOCTYPE html><html><head><style>h1 {text-align: center;}";
   content += "div {background-color: black;width: 315px;border: 2px solid white;padding: 25px;margin: auto;outline: black solid 20px;color: #ffffff;}";
   content += ".button {background-color: #2774c4;border: 2px solid white;color: white;padding: 20px;text-align: center;text-decoration: none;";
@@ -48,8 +45,10 @@ void handleRoot() {
   content += ".button1 {background-color: #ee5622;border: 2px solid white;color: white;padding: 20px;text-align: center;text-decoration: none;";
   content += "display: inline-block;font-size: 20px;margin: 0px 4px;cursor: pointer;border-radius: 4px;box-shadow: 0 4px #999;}";
   content += ".button1:hover {background-color: #ff0000}.button1:active {background-color: #d60404;box-shadow: 0 3px #666;transform: translateY(4px);}";
-  content += ".dot_1 {height: 25px;width: 25px;background-color: %02d;border-radius: 50%;display: inline-block;}", color;
-  content += "</style></head><body><h1>Sterowanie</h1><div><p>";
+  content += ".dot_1 {height: 25px;width: 25px;background-color:";
+  content += color;
+  content += ";border-radius: 50%;display: inline-block;}";
+  content += "</style></head><body><h1>Sterowanie - test</h1><div><p>";
   content += "<a href=\'?key1=1\'><button class='button'>POMPA ON</button><a href=\'?key2=2\'><button class='button1'>POMPA OFF</button></a></p>";
   content += "<p> STAN:&nbsp&nbsp<span class='dot_1'></span></p></div></body></html>";
   server.send(200, "text/html", content);
@@ -187,6 +186,7 @@ void setup() {
 
 void loop() {
   server.handleClient();
+   ArduinoOTA.handle();
   unsigned long t = 5000;
   static unsigned long _ETimer;
   if ( millis() - _ETimer >= (t)) {
@@ -212,7 +212,7 @@ void loop() {
         String domoticzIP = "http://192.168.1.55:8080/json.htm?type=command&param=udevice&idx=38&nvalue=0&svalue=";
         Serial.print("[HTTP] begin...\n");
         uint16_t empty = 2300; //odleglosc do dna pustego zbiornika
-        uint16_t full = 300; //odleglosc od powierzchni przy pełnym zbiorniku
+        uint16_t full = 220; //odleglosc od powierzchni przy pełnym zbiorniku
         int16_t licznik = (avgPomiary - empty);
         Serial.println(licznik);
         int16_t mianownik = (full - empty);
@@ -222,9 +222,35 @@ void loop() {
         perc = perc * 100;
         Serial.println(perc);
         String link = domoticzIP += perc;
+        String domoticzIP_2 = "http://192.168.1.55:8080/json.htm?type=command&param=udevice&idx=39&nvalue=0&svalue=";
+        String link_2 = domoticzIP_2 += avgPomiary;
         Serial.println(link);
 
         if (http.begin(client, link)) { //PROCENTOWO!!!!
+
+          Serial.print("[HTTP] GET...\n");
+          // start connection and send HTTP header
+          int httpCode = http.GET();
+
+          // httpCode will be negative on error
+          if (httpCode > 0) {
+            // HTTP header has been send and Server response header has been handled
+            Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+
+            // file found at server
+            if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+              String payload = http.getString();
+              Serial.println(payload);
+            }
+          } else {
+            Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+          }
+
+
+          http.end();
+        }
+
+                if (http.begin(client, link_2)) { //PROCENTOWO!!!!
 
           Serial.print("[HTTP] GET...\n");
           // start connection and send HTTP header
